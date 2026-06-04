@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BirdRisk — Know the sky before you fly</title>
+<meta name="description" content="BirdRisk turns bird-strike risk into a single, glanceable score for your route. Join the waitlist for the iPhone and iPad app." />
+
+<!-- Open Graph / social -->
+<meta property="og:title" content="BirdRisk — Know the sky before you fly" />
+<meta property="og:description" content="Real-time bird-strike risk for pilots, on iPhone and iPad. Join the waitlist." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://birdrisk.com" />
+
+<link rel="canonical" href="https://birdrisk.com/" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="theme-color" content="#5F322F" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=B612+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+  /* ── Brand tokens (inherited from apps/frontend-pwa/src/styles/tokens.css) ── */
+  :root {
+    --brand-primary: #5F322F;        /* Proportione marrón rojizo */
+    --brand-primary-light: #7a4542;
+    --brand-accent: #6E8157;         /* oliva */
+    --brand-accent-light: #8a9e6e;
+    --brand-cream: #F5F0E6;
+    --ink: #241a18;
+    --ink-soft: #5b4d48;
+
+    /* App-screen (dark map) palette */
+    --map-bg: #0f172a;
+    --map-panel: #1e293b;
+    --risk-critical: #dc2626;
+    --risk-high: #ea580c;
+    --risk-medium: #ca8a04;
+    --risk-low: #16a34a;
+
+    --font-ui: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-data: 'B612 Mono', 'SF Mono', 'Fira Code', monospace;
+    --radius: 16px;
+    --shadow-soft: 0 12px 40px rgba(95, 50, 47, 0.14);
+    --shadow-device: 0 30px 80px rgba(15, 23, 42, 0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--brand-cream);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { width: min(1120px, 92vw); margin-inline: auto; }
+
+  /* ── Top bar ── */
+  header.nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(245, 240, 230, 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid rgba(95, 50, 47, 0.08);
+  }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; }
+  .brand .glyph { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-light)); }
+  .brand .glyph svg { width: 20px; height: 20px; }
+  .nav a.cta { font-weight: 700; text-decoration: none; padding: 9px 18px; border-radius: 999px;
+    background: var(--brand-primary); color: #fff; font-size: 0.92rem; transition: transform .25s, box-shadow .25s; }
+  .nav a.cta:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(95,50,47,.28); }
+
+  /* ── Hero ── */
+  .hero { padding: clamp(40px, 7vw, 96px) 0 clamp(30px, 5vw, 64px); }
+  .hero .wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(24px, 5vw, 64px); align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.8rem;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--brand-accent); margin-bottom: 18px; }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-accent); animation: blink 2.4s ease-in-out infinite; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); line-height: 1.06; letter-spacing: -0.02em; font-weight: 800; color: var(--brand-primary); }
+  h1 em { font-style: normal; color: var(--brand-accent); }
+  .sub { margin-top: 20px; font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--ink-soft); max-width: 48ch; }
+
+  /* ── Waitlist form ── */
+  .signup { margin-top: 30px; max-width: 460px; }
+  .field { display: flex; gap: 10px; background: #fff; padding: 7px; border-radius: 999px;
+    box-shadow: var(--shadow-soft); border: 1px solid rgba(95,50,47,.08); }
+  .field input { flex: 1; border: 0; outline: 0; padding: 12px 16px; font-size: 1rem; font-family: var(--font-ui);
+    background: transparent; color: var(--ink); border-radius: 999px; }
+  .field button { border: 0; cursor: pointer; padding: 12px 24px; border-radius: 999px; font-weight: 700;
+    font-family: var(--font-ui); font-size: 0.98rem; color: #fff;
+    background: linear-gradient(135deg, var(--brand-accent), var(--brand-accent-light));
+    transition: transform .25s, box-shadow .25s; }
+  .field button:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(110,129,87,.4); }
+  .field button:disabled { opacity: .6; cursor: progress; }
+  .form-note { margin-top: 12px; font-size: 0.82rem; color: var(--ink-soft); }
+  .form-msg { margin-top: 14px; font-weight: 600; min-height: 1.4em; }
+  .form-msg.ok { color: var(--brand-accent); }
+  .form-msg.err { color: var(--risk-high); }
+
+  /* App Store coming-soon badge */
+  .appstore { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; text-decoration: none;
+    background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 12px; transition: transform .25s, opacity .25s; }
+  .appstore:hover { transform: translateY(-1px); opacity: .92; }
+  .appstore svg { width: 22px; height: 22px; }
+  .appstore span { display: flex; flex-direction: column; line-height: 1.1; }
+  .appstore small { font-size: 0.62rem; letter-spacing: .04em; opacity: .8; }
+  .appstore b { font-size: 1.05rem; }
+
+  /* Risk-level legend chips */
+  .risk-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .risk-chips .chip { font-family: var(--font-data); font-size: 8px; letter-spacing: .08em;
+    padding: 2px 6px; border-radius: 999px; color: #0b1220; font-weight: 700; }
+  .chip.low { background: var(--risk-low); } .chip.med { background: var(--risk-medium); }
+  .chip.high { background: var(--risk-high); color:#fff; } .chip.crit { background: var(--risk-critical); color:#fff; }
+
+  /* Impact-stat band */
+  .stats { background: var(--brand-primary); color: var(--brand-cream); padding: clamp(36px, 5vw, 60px) 0; }
+  .stats .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: center; }
+  .stats .n { font-family: var(--font-data); font-weight: 700; font-size: clamp(2rem, 5vw, 3rem); line-height: 1;
+    color: #fff; letter-spacing: -0.01em; }
+  .stats .k { margin-top: 10px; font-size: 0.92rem; opacity: .82; }
+  .stats .src { display: block; margin-top: 6px; font-size: 0.7rem; opacity: .5; }
+  @media (max-width: 820px) { .stats .wrap { grid-template-columns: 1fr; gap: 30px; } }
+
+  .trust { margin-top: 26px; display: flex; gap: 22px; flex-wrap: wrap; font-size: 0.86rem; color: var(--ink-soft); }
+  .trust span { display: inline-flex; align-items: center; gap: 7px; }
+  .trust svg { width: 16px; height: 16px; color: var(--brand-accent); }
+
+  /* ── Device cluster ── */
+  .devices { position: relative; display: grid; place-items: center; min-height: 520px; }
+
+  /* iPad (behind) */
+  .ipad { position: absolute; right: -2%; top: 8%; width: min(62%, 360px); aspect-ratio: 1024 / 768;
+    background: #0b1220; border-radius: 26px; padding: 14px; box-shadow: var(--shadow-device);
+    border: 2px solid #2b3650; transform: rotate(4deg); }
+  .ipad .screen { border-radius: 14px; }
+
+  /* iPhone (front) */
+  .iphone { position: relative; z-index: 2; width: min(50%, 270px); aspect-ratio: 9 / 19.5;
+    background: #0b1220; border-radius: 42px; padding: 12px; box-shadow: var(--shadow-device);
+    border: 3px solid #2b3650; transform: translateX(-14%) rotate(-3deg); }
+  .iphone .notch { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 5;
+    width: 84px; height: 24px; background: #05080f; border-radius: 14px; }
+  .iphone .screen { border-radius: 32px; }
+
+  .screen { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--map-bg); }
+
+  /* ── Animated app screen contents ── */
+  /* moving map base */
+  .map-grid { position: absolute; inset: -20%; background-image:
+      linear-gradient(rgba(110,129,87,.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,129,87,.10) 1px, transparent 1px);
+    background-size: 34px 34px; animation: pan 18s linear infinite; }
+
+  /* radar sweep */
+  .radar { position: absolute; left: 50%; top: 46%; width: 0; height: 0; }
+  .radar .sweep { position: absolute; left: 0; top: 0; width: 150px; height: 150px; margin: -75px 0 0 -75px;
+    border-radius: 50%; background: conic-gradient(from 0deg, rgba(110,129,87,.45), transparent 55%);
+    animation: sweep 3.6s linear infinite; mix-blend-mode: screen; }
+  .radar .ring { position: absolute; border: 1px solid rgba(110,129,87,.25); border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+  .radar .ring.r1 { width: 70px; height: 70px; } .radar .ring.r2 { width: 130px; height: 130px; }
+
+  /* pulsing risk zones */
+  .zone { position: absolute; border-radius: 50%; filter: blur(2px); transform: translate(-50%,-50%); }
+  .zone::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid currentColor;
+    animation: pulse 2.8s ease-out infinite; }
+  .zone.crit { left: 38%; top: 40%; width: 54px; height: 54px; color: var(--risk-critical);
+    background: radial-gradient(circle, rgba(220,38,38,.55), transparent 70%); }
+  .zone.high { left: 64%; top: 60%; width: 44px; height: 44px; color: var(--risk-high);
+    background: radial-gradient(circle, rgba(234,88,12,.45), transparent 70%); animation-delay: -1s; }
+  .zone.high::after { animation-delay: .9s; }
+  .zone.med  { left: 30%; top: 68%; width: 38px; height: 38px; color: var(--risk-medium);
+    background: radial-gradient(circle, rgba(202,138,4,.4), transparent 70%); }
+  .zone.med::after { animation-delay: 1.7s; }
+
+  /* drifting birds */
+  .bird { position: absolute; width: 14px; height: 14px; color: #cbd5e1; opacity: .85; }
+  .bird svg { width: 100%; height: 100%; }
+  .bird.b1 { top: 30%; animation: drift1 11s linear infinite; }
+  .bird.b2 { top: 55%; animation: drift2 14s linear infinite; animation-delay: -4s; transform: scaleX(-1); }
+  .bird.b3 { top: 74%; animation: drift1 9s linear infinite; animation-delay: -6s; }
+
+  /* planned route line */
+  .route { position: absolute; inset: 0; }
+  .route path { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round;
+    stroke-dasharray: 8 10; animation: dash 1.6s linear infinite; opacity: .9; }
+  .route .ac { fill: #fff; }
+
+  /* bottom risk sheet (iPhone) */
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 18px;
+    background: linear-gradient(180deg, rgba(30,41,59,0), rgba(30,41,59,.96) 28%);
+    color: #e2e8f0; font-family: var(--font-data); }
+  .sheet .lbl { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #94a3b8; }
+  .sheet .score { display: flex; align-items: baseline; gap: 6px; }
+  .sheet .score b { font-size: 30px; line-height: 1; color: var(--risk-high); }
+  .sheet .score b .num { display: inline-block; animation: count 4s steps(1) infinite; }
+  .sheet .score span { font-size: 11px; color: #cbd5e1; }
+  .meter { margin-top: 8px; height: 6px; border-radius: 4px; background: #0b1220; overflow: hidden; }
+  .meter i { display: block; height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--risk-low), var(--risk-medium), var(--risk-high), var(--risk-critical));
+    transform-origin: left; animation: fill 4s ease-in-out infinite; }
+
+  /* iPad side panel briefing */
+  .pad-layout { display: grid; grid-template-columns: 1fr 96px; height: 100%; }
+  .panel { background: rgba(15,23,42,.85); border-left: 1px solid #2b3650; padding: 10px; color: #e2e8f0; font-family: var(--font-data); }
+  .panel .ph { font-size: 8px; letter-spacing: .12em; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
+  .bar { height: 7px; border-radius: 3px; background: #1e293b; margin: 7px 0; overflow: hidden; }
+  .bar i { display: block; height: 100%; transform-origin: left; animation: grow 3.4s ease-in-out infinite; }
+  .bar.b-1 i { width: 82%; background: var(--risk-critical); animation-delay: 0s; }
+  .bar.b-2 i { width: 60%; background: var(--risk-high); animation-delay: .4s; }
+  .bar.b-3 i { width: 38%; background: var(--risk-medium); animation-delay: .8s; }
+  .bar.b-4 i { width: 22%; background: var(--risk-low); animation-delay: 1.2s; }
+
+  /* ── Features ── */
+  .features { padding: clamp(40px, 6vw, 88px) 0; }
+  .features h2 { text-align: center; font-size: clamp(1.6rem, 3.4vw, 2.4rem); color: var(--brand-primary); letter-spacing: -0.02em; }
+  .features .lead { text-align: center; max-width: 56ch; margin: 14px auto 48px; color: var(--ink-soft); }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { background: #fff; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(95,50,47,.06); transition: transform .3s; }
+  .card:hover { transform: translateY(-4px); }
+  .card .ic { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 16px;
+    background: rgba(110,129,87,.12); color: var(--brand-accent); }
+  .card .ic svg { width: 24px; height: 24px; }
+  .card h3 { font-size: 1.15rem; color: var(--brand-primary); margin-bottom: 8px; }
+  .card p { color: var(--ink-soft); font-size: 0.96rem; }
+
+  /* ── How it works ── */
+  .how { padding: clamp(40px, 6vw, 80px) 0; background: #fff; }
+  .how h2 { text-align: center; font-size: clamp(1.6rem, 3.4vw, 2.4rem); color: var(--brand-primary); letter-spacing: -0.02em; margin-bottom: 48px; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; counter-reset: step; }
+  .step { position: relative; padding-top: 14px; }
+  .step .num { font-family: var(--font-data); font-weight: 700; font-size: 2.2rem; color: var(--brand-accent); opacity: .35; line-height: 1; }
+  .step h3 { color: var(--brand-primary); margin: 8px 0 6px; font-size: 1.15rem; }
+  .step p { color: var(--ink-soft); font-size: 0.96rem; }
+
+  /* ── Alternating showcase ── */
+  .showcase { padding: clamp(36px, 5vw, 72px) 0; }
+  .showcase .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .showcase.rev .copy { order: 2; }
+  .showcase .copy .tag { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--brand-accent); }
+  .showcase .copy h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); color: var(--brand-primary); letter-spacing: -0.02em; margin: 12px 0 14px; }
+  .showcase .copy p { color: var(--ink-soft); font-size: 1.05rem; max-width: 44ch; }
+  .visual { background: var(--map-bg); border-radius: 22px; padding: 22px; box-shadow: var(--shadow-device); position: relative; overflow: hidden; min-height: 280px; }
+
+  /* hourly risk timeline (showcase 2) */
+  .timeline { display: flex; align-items: flex-end; gap: 5px; height: 170px; position: relative; z-index: 2; }
+  .timeline .h { flex: 1; border-radius: 4px 4px 0 0; transform-origin: bottom; animation: rise 3s ease-in-out infinite; }
+  .timeline .lab { position: absolute; bottom: -22px; left: 0; right: 0; display: flex; justify-content: space-between;
+    font-family: var(--font-data); font-size: 9px; color: #64748b; }
+  .tl-cap { margin-top: 34px; font-family: var(--font-data); font-size: 11px; color: #94a3b8; }
+  .tl-cap b { color: var(--risk-high); }
+
+  /* ── Origin / credibility band ── */
+  .origin { padding: clamp(36px, 5vw, 64px) 0; text-align: center; }
+  .origin .wrap { max-width: 720px; }
+  .origin .q { font-size: clamp(1.25rem, 2.6vw, 1.7rem); color: var(--brand-primary); font-weight: 700; line-height: 1.35; letter-spacing: -0.01em; }
+  .origin .by { margin-top: 18px; font-size: 0.92rem; color: var(--ink-soft); }
+
+  /* ── FAQ ── */
+  .faq { padding: clamp(36px, 5vw, 72px) 0; background: #fff; }
+  .faq h2 { text-align: center; font-size: clamp(1.6rem, 3.4vw, 2.4rem); color: var(--brand-primary); margin-bottom: 36px; letter-spacing: -0.02em; }
+  .faq .wrap { max-width: 760px; }
+  details { border-bottom: 1px solid rgba(95,50,47,.12); padding: 18px 4px; }
+  details summary { cursor: pointer; font-weight: 700; color: var(--brand-primary); list-style: none; display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; font-size: 1.4rem; color: var(--brand-accent); transition: transform .25s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin-top: 12px; color: var(--ink-soft); }
+
+  /* ── Closing CTA ── */
+  .closing { padding: clamp(40px, 6vw, 80px) 0 clamp(60px, 8vw, 100px); text-align: center; }
+  .closing .box { background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-light));
+    color: var(--brand-cream); border-radius: 28px; padding: clamp(36px, 6vw, 64px); box-shadow: var(--shadow-device); }
+  .closing h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); margin-bottom: 14px; }
+  .closing p { opacity: .9; max-width: 50ch; margin: 0 auto 28px; }
+  .closing .field { max-width: 440px; margin-inline: auto; }
+
+  footer { padding: 28px 0 40px; text-align: center; color: var(--ink-soft); font-size: 0.85rem; }
+  footer .brand { justify-content: center; margin-bottom: 10px; color: var(--brand-primary); }
+
+  /* ── Scroll reveal (progressive enhancement; visible without JS) ── */
+  html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.25,.46,.45,.94), transform .7s cubic-bezier(.25,.46,.45,.94); }
+  html.js .reveal.in { opacity: 1; transform: none; }
+  html.js .reveal.d1 { transition-delay: .08s; }
+  html.js .reveal.d2 { transition-delay: .16s; }
+  html.js .reveal.d3 { transition-delay: .24s; }
+
+  /* ── Hero depth ── */
+  .hero { position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(55% 45% at 82% -5%, rgba(110,129,87,.12), transparent 70%),
+      radial-gradient(45% 40% at -5% 105%, rgba(95,50,47,.07), transparent 70%); }
+  .hero .wrap { position: relative; z-index: 1; }
+  /* subtle float on the device cluster */
+  .devices { animation: float 7s ease-in-out infinite; }
+
+  /* ── "Made for a glance" gauge showcase ── */
+  @property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+  .glance { display: flex; flex-direction: column; align-items: center; gap: 16px; position: relative; z-index: 2;
+    color: #e2e8f0; font-family: var(--font-data); }
+  .glance-ring { --p: 72; position: relative; width: 168px; height: 168px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: conic-gradient(var(--risk-high) calc(var(--p) * 1%), rgba(148,163,184,.16) 0);
+    animation: fillring 3.2s ease-in-out infinite alternate; }
+  .glance-ring::after { content: ""; position: absolute; width: 128px; height: 128px; border-radius: 50%; background: var(--map-bg); }
+  .glance-ring .v { position: relative; z-index: 1; text-align: center; }
+  .glance-ring .v b { display: block; font-size: 30px; line-height: 1; color: var(--risk-high); }
+  .glance-ring .v small { font-size: 9px; letter-spacing: .14em; color: #94a3b8; }
+  .glance .route-lbl { font-size: 11px; color: #94a3b8; letter-spacing: .06em; }
+
+  /* ── Sticky mobile CTA ── */
+  .mcta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: none;
+    padding: 12px 16px calc(12px + var(--sab)); background: rgba(245,240,230,.94);
+    backdrop-filter: blur(12px); border-top: 1px solid rgba(95,50,47,.1);
+    transform: translateY(130%); transition: transform .35s cubic-bezier(.25,.46,.45,.94); }
+  .mcta.show { transform: none; }
+  .mcta a { display: block; text-align: center; background: var(--brand-primary); color: #fff;
+    font-weight: 700; padding: 14px; border-radius: 999px; text-decoration: none; }
+
+  /* ── Richer footer ── */
+  .foot-cols { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 32px; text-align: left;
+    padding-bottom: 28px; border-bottom: 1px solid rgba(95,50,47,.1); margin-bottom: 22px; }
+  .foot-cols h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--brand-accent); margin-bottom: 12px; }
+  .foot-cols a { display: block; color: var(--ink-soft); text-decoration: none; padding: 4px 0; font-size: .92rem; }
+  .foot-cols a:hover { color: var(--brand-primary); }
+  .foot-cols .blurb { color: var(--ink-soft); font-size: .9rem; max-width: 30ch; margin-top: 10px; }
+
+  /* ── "Says without saying": operational / HUD aesthetic ── */
+  .framed { position: relative; max-width: 680px; margin-inline: auto; padding: 38px 40px; }
+  .corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--brand-accent); opacity: .45; }
+  .corner.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+  .corner.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+  .corner.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+  .corner.br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+  .opzone { font-family: var(--font-data); font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink-soft); opacity: .65; margin-bottom: 18px; }
+  .cred { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
+    font-family: var(--font-data); font-size: .76rem; letter-spacing: .03em; color: var(--ink-soft); }
+  .cred svg { width: 15px; height: 15px; color: var(--brand-accent); flex: none; }
+
+  /* ── Responsive ── */
+  @media (max-width: 820px) {
+    .mcta { display: block; }
+    .framed { padding: 32px 22px; }
+    .foot-cols { grid-template-columns: 1fr; gap: 24px; text-align: center; }
+    .foot-cols .blurb { margin-inline: auto; }
+    .hero .wrap { grid-template-columns: 1fr; }
+    .devices { min-height: 440px; margin-top: 10px; }
+    .grid3 { grid-template-columns: 1fr; }
+    .trust { justify-content: flex-start; }
+    .steps { grid-template-columns: 1fr; gap: 22px; }
+    .showcase .wrap { grid-template-columns: 1fr; }
+    .showcase.rev .copy { order: 0; }
+  }
+
+  /* ── Keyframes ── */
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  @keyframes pan { from { transform: translate(0,0); } to { transform: translate(34px, 34px); } }
+  @keyframes sweep { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.4); opacity: 0; } }
+  @keyframes drift1 { from { left: -8%; } to { left: 108%; } }
+  @keyframes drift2 { from { left: 108%; } to { left: -8%; } }
+  @keyframes dash { to { stroke-dashoffset: -18; } }
+  @keyframes fill { 0%,100% { transform: scaleX(.62); } 50% { transform: scaleX(.86); } }
+  @keyframes grow { 0%,100% { transform: scaleX(.85); } 50% { transform: scaleX(1); } }
+  @keyframes rise { 0%,100% { transform: scaleY(.82); } 50% { transform: scaleY(1); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes fillring { from { --p: 54; } to { --p: 82; } }
+  @keyframes count { 0% { } 25% { } 50% { } 75% { } }
+
+  /* Accessibility: respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────── Nav ───────── -->
+<header class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <span class="glyph">
+        <svg viewBox="0 0 24 24" fill="#F5F0E6" aria-hidden="true">
+          <path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+        </svg>
+      </span>
+      BirdRisk
+    </div>
+    <a class="cta" href="#waitlist">Join the waitlist</a>
+  </div>
+</header>
+
+<!-- ───────── Hero ───────── -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> Coming soon to the App Store · iPhone &amp; iPad</span>
+      <h1>Know the sky <em>before</em> you fly.</h1>
+      <p class="sub">BirdRisk turns live bird-strike data into one glanceable risk level for every route across <strong>Spain and Portugal</strong> — so the call is yours, fully informed, before you ever leave the ground.</p>
+
+      <!-- Waitlist form -->
+      <form class="signup" id="waitlist-form" novalidate>
+        <div class="field">
+          <input type="email" id="email" name="EMAIL" placeholder="your@email.com" autocomplete="email" required aria-label="Email address" />
+          <button type="submit" id="submit-btn">Become a beta tester</button>
+        </div>
+        <p class="form-note"><strong>We're looking for beta testers.</strong> Join the list to be the first to fly with BirdRisk. No spam — one email when it's ready.</p>
+        <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <a class="appstore" href="#waitlist" aria-label="Coming soon to the App Store">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 1.7c.1 1-.3 2-1 2.8-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.7-.8 1.9-1.4 2.8-1.4ZM19 17.3c-.5 1.2-.8 1.7-1.4 2.7-.9 1.4-2.2 3.2-3.8 3.2-1.4 0-1.8-.9-3.7-.9s-2.3.9-3.7.9c-1.6 0-2.8-1.6-3.7-3C-.1 16.8-.5 11.4 1.9 8.6c1-1.3 2.5-2 4-2 1.5 0 2.5 1 3.7 1 1.2 0 1.9-1 3.7-1 1.3 0 2.7.7 3.7 2-3.3 1.8-2.7 6.5.0 8.7Z"/></svg>
+        <span><small>Coming soon on the</small><b>App Store</b></span>
+      </a>
+
+      <div class="trust">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Built for pilots</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Informs, never decides</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Your data, your control</span>
+      </div>
+    </div>
+
+    <!-- Animated device cluster -->
+    <div class="devices" aria-hidden="true">
+      <!-- iPad (behind) -->
+      <div class="ipad">
+        <div class="screen">
+          <div class="pad-layout">
+            <div style="position:relative;overflow:hidden;">
+              <div class="map-grid"></div>
+              <div class="radar"><span class="ring r1"></span><span class="ring r2"></span><span class="sweep"></span></div>
+              <span class="zone crit"></span><span class="zone high"></span><span class="zone med"></span>
+              <svg class="route" viewBox="0 0 300 220" preserveAspectRatio="none">
+                <path d="M30 180 C 110 120, 170 150, 260 50" />
+                <circle class="ac" cx="260" cy="50" r="4" />
+              </svg>
+              <span class="bird b1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
+              <span class="bird b2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
+            </div>
+            <div class="panel">
+              <div class="ph">Route risk</div>
+              <div class="bar b-1"><i></i></div>
+              <div class="bar b-2"><i></i></div>
+              <div class="bar b-3"><i></i></div>
+              <div class="bar b-4"><i></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- iPhone (front) -->
+      <div class="iphone">
+        <span class="notch"></span>
+        <div class="screen">
+          <div class="map-grid"></div>
+          <div class="radar"><span class="ring r1"></span><span class="ring r2"></span><span class="sweep"></span></div>
+          <span class="zone crit"></span><span class="zone high"></span><span class="zone med"></span>
+          <svg class="route" viewBox="0 0 270 580" preserveAspectRatio="none">
+            <path d="M40 500 C 120 380, 90 280, 200 120" />
+            <circle class="ac" cx="200" cy="120" r="5" />
+          </svg>
+          <span class="bird b1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
+          <span class="bird b2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
+          <span class="bird b3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
+          <div class="sheet">
+            <div class="lbl">Bird-strike risk · LEMD → LPPT</div>
+            <div class="score"><b>HIGH</b> <span>· peak 18:00–20:00 UTC</span></div>
+            <div class="meter"><i></i></div>
+            <div class="risk-chips" style="margin-top:8px;">
+              <span class="chip low">LOW</span><span class="chip med">MED</span>
+              <span class="chip high">HIGH</span><span class="chip crit">CRIT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Impact stats ───────── -->
+<section class="stats">
+  <div class="wrap">
+    <div>
+      <div class="n">1 every 7 min</div>
+      <div class="k">A bird strike is reported somewhere in the world<span class="src">214,734 reports worldwide, 2022–2024 · ICAO IBIS</span></div>
+    </div>
+    <div>
+      <div class="n">~50%</div>
+      <div class="k">of bird strikes are never even reported<span class="src">ICAO / EASA wildlife hazard data</span></div>
+    </div>
+    <div>
+      <div class="n">$1.2B</div>
+      <div class="k">lost to bird strikes by aviation every year<span class="src">Annual global cost estimate</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Features ───────── -->
+<section class="features">
+  <div class="wrap">
+    <h2>One score. Every bird. Before takeoff.</h2>
+    <p class="lead">Built for pilots flying Spain and Portugal, BirdRisk does one thing well: it tells you how risky birds make your route right now — clearly enough to glance at on a kneeboard.</p>
+    <div class="grid3">
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6 9 3l6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/></svg></div>
+        <h3>Risk along your route</h3>
+        <p>Draw your departure and destination — BirdRisk colours the corridor by live bird-strike likelihood, hour by hour.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="5"/></svg></div>
+        <h3>Real bird data</h3>
+        <p>Migration corridors, radar activity and seasonal patterns fused into a single score you can trust at a glance.</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg></div>
+        <h3>You stay in command</h3>
+        <p>BirdRisk informs — it never tells you to go or no-go. The final call is always yours, the way aviation works.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── How it works ───────── -->
+<section class="how" id="how">
+  <div class="wrap">
+    <h2>From route to risk in three taps.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Set your route</h3>
+        <p>Pick departure and destination anywhere in Spain or Portugal — or just drop a point.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>See the risk</h3>
+        <p>BirdRisk colours your corridor and gives you one clear level: low, medium, high or critical.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Make the call</h3>
+        <p>Fly, wait or re-time — fully informed. BirdRisk never decides for you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Showcase: made for a glance ───────── -->
+<section class="showcase">
+  <div class="wrap">
+    <div class="copy reveal">
+      <span class="tag">Kneeboard-ready</span>
+      <h2>One look. One number. Decide.</h2>
+      <p>No menus, no clutter. BirdRisk gives you a single risk level for your route — big enough to read on a kneeboard, fast enough to check on the taxiway.</p>
+    </div>
+    <div class="visual reveal d1">
+      <div class="map-grid"></div>
+      <div class="glance" aria-hidden="true">
+        <div class="glance-ring"><div class="v"><b>HIGH</b><small>RISK</small></div></div>
+        <div class="route-lbl">LEMD → LPPT · now</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Showcase: risk by the hour ───────── -->
+<section class="showcase rev">
+  <div class="wrap">
+    <div class="copy">
+      <span class="tag">Timing is everything</span>
+      <h2>Risk changes by the hour.</h2>
+      <p>Birds move at dawn and dusk. BirdRisk shows you how the risk on your route rises and falls through the day — so you can pick the safest window to depart.</p>
+    </div>
+    <div class="visual">
+      <div class="timeline" aria-hidden="true">
+        <div class="h" style="height:38%;background:var(--risk-low)"></div>
+        <div class="h" style="height:34%;background:var(--risk-low);animation-delay:.1s"></div>
+        <div class="h" style="height:40%;background:var(--risk-low);animation-delay:.2s"></div>
+        <div class="h" style="height:58%;background:var(--risk-medium);animation-delay:.3s"></div>
+        <div class="h" style="height:52%;background:var(--risk-medium);animation-delay:.4s"></div>
+        <div class="h" style="height:44%;background:var(--risk-low);animation-delay:.5s"></div>
+        <div class="h" style="height:48%;background:var(--risk-medium);animation-delay:.6s"></div>
+        <div class="h" style="height:70%;background:var(--risk-high);animation-delay:.7s"></div>
+        <div class="h" style="height:95%;background:var(--risk-critical);animation-delay:.8s"></div>
+        <div class="h" style="height:80%;background:var(--risk-high);animation-delay:.9s"></div>
+        <div class="h" style="height:54%;background:var(--risk-medium);animation-delay:1s"></div>
+        <div class="h" style="height:40%;background:var(--risk-low);animation-delay:1.1s"></div>
+        <div class="lab"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div>
+      </div>
+      <div class="tl-cap">Peak risk today: <b>18:00–20:00 UTC</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Origin / credibility ───────── -->
+<section class="origin">
+  <div class="wrap">
+    <div class="framed reveal">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <p class="opzone">Operating area · Iberia · 36°N–44°N</p>
+      <p class="q">The same bird-risk intelligence Proportione builds for professional aviation — now in your pocket.</p>
+      <p class="by">A project by <strong>Proportione</strong>, for pilots flying Spain &amp; Portugal.</p>
+      <p class="cred">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+        Built on Proportione's professional aviation-safety platform · BACSI&nbsp;IdEA&nbsp;ID.527
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── FAQ ───────── -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <h2>Questions, answered</h2>
+    <details open>
+      <summary>Which countries does BirdRisk cover?</summary>
+      <p>At launch, BirdRisk covers <strong>Spain and Portugal</strong>. More regions may follow based on demand.</p>
+    </details>
+    <details>
+      <summary>Does the app tell me whether to fly?</summary>
+      <p>No. BirdRisk gives you the risk level and the data behind it, but the go / no-go decision is always yours — that's how aviation works.</p>
+    </details>
+    <details>
+      <summary>When does it launch?</summary>
+      <p>It's coming soon to the App Store for iPhone and iPad. Join the waitlist and you'll be among the first beta testers.</p>
+    </details>
+    <details>
+      <summary>What will it cost?</summary>
+      <p>A simple yearly subscription with a free trial, so you can try the full app before paying anything.</p>
+    </details>
+    <details>
+      <summary>Who's behind BirdRisk?</summary>
+      <p>BirdRisk is a project by <strong>Proportione</strong>, built on its work in geospatial aviation-safety intelligence.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ───────── Closing CTA ───────── -->
+<section class="closing" id="waitlist">
+  <div class="wrap">
+    <div class="box">
+      <h2>Want to be a beta tester?</h2>
+      <p>BirdRisk is coming soon to the App Store for pilots flying Spain and Portugal. Join the list to be among the first to test it — and help shape the app before launch. Leisure, professional and operational crews all welcome.</p>
+      <form class="signup" id="waitlist-form-2" novalidate>
+        <div class="field">
+          <input type="email" name="EMAIL" placeholder="your@email.com" autocomplete="email" required aria-label="Email address" />
+          <button type="submit">Count me in</button>
+        </div>
+        <p class="form-msg" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-cols">
+      <div>
+        <div class="brand" style="margin-bottom:0;">
+          <span class="glyph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#F5F0E6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4 20-7Z" />
+            </svg>
+          </span>
+          BirdRisk
+        </div>
+        <p class="blurb">Bird-strike risk for pilots flying Spain &amp; Portugal. A project by <strong>Proportione</strong>.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="#waitlist">Join the waitlist</a>
+        <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="https://proportione.com" target="_blank" rel="noopener">Proportione</a>
+        <a href="mailto:hello@birdrisk.com">Contact</a>
+        <a href="/privacy">Privacy</a>
+      </div>
+    </div>
+    <p>© 2026 BirdRisk · A project by Proportione · Coming soon to the App Store</p>
+  </div>
+</footer>
+
+<!-- Sticky mobile CTA -->
+<div class="mcta"><a href="#waitlist">Become a beta tester</a></div>
+
+<script>
+  // TODO(human): paste the Brevo form endpoint here.
+  // Brevo → Contacts → Forms → (your BirdRisk waitlist form) → Share →
+  // copy the "https://sibforms.com/serve/<id>" URL. Leave a double opt-in
+  // enabled on that form so consent is auditable (GDPR). No API key needed.
+  const BREVO_FORM_URL = '';
+
+  // Brevo's field "tag" for the email input on a default sibforms form.
+  const BREVO_EMAIL_FIELD = 'EMAIL';
+
+  /**
+   * Sends a waitlist email to our Brevo list.
+   * sibforms is cross-origin and answers with an opaque redirect, so we POST
+   * with mode:'no-cors' (we can't read the response) and treat a completed
+   * request as success. Brevo then handles the double opt-in email itself.
+   * @param {string} email - validated email address
+   * @returns {Promise<void>} - resolve on success, throw on failure
+   */
+  async function submitToBrevo(email) {
+    if (!BREVO_FORM_URL) throw new Error('Brevo endpoint not configured yet');
+    const body = new URLSearchParams();
+    body.append(BREVO_EMAIL_FIELD, email);
+    body.append('email_address_check', '');   // Brevo honeypot field (anti-spam)
+    body.append('locale', 'en');
+    await fetch(BREVO_FORM_URL, { method: 'POST', mode: 'no-cors', body });
+  }
+
+  function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  function wireForm(form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input[type="email"]');
+      const msg = form.querySelector('.form-msg');
+      const btn = form.querySelector('button');
+      const email = (input.value || '').trim();
+
+      if (!isValidEmail(email)) {
+        if (msg) { msg.textContent = 'Please enter a valid email address.'; msg.className = 'form-msg err'; }
+        input.focus();
+        return;
+      }
+
+      if (btn) { btn.disabled = true; }
+      if (msg) { msg.textContent = ''; msg.className = 'form-msg'; }
+
+      try {
+        await submitToBrevo(email);
+        if (msg) { msg.textContent = "You're on the list — see you in the sky. 🛩️"; msg.className = 'form-msg ok'; }
+        form.reset();
+      } catch (err) {
+        if (msg) { msg.textContent = 'Something went wrong. Please try again in a moment.'; msg.className = 'form-msg err'; }
+      } finally {
+        if (btn) { btn.disabled = false; }
+      }
+    });
+  }
+
+  document.querySelectorAll('form.signup').forEach(wireForm);
+
+  /* ── Progressive enhancement: scroll-reveal + sticky mobile CTA ── */
+  (function enhance() {
+    const root = document.documentElement;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return;  // content stays visible
+    root.classList.add('js');
+
+    // Tag below-the-fold blocks for reveal, staggering siblings within a group.
+    const groups = ['.stats .wrap', '.grid3', '.steps'];
+    groups.forEach(sel => {
+      const parent = document.querySelector(sel);
+      if (!parent) return;
+      [...parent.children].forEach((el, i) => {
+        el.classList.add('reveal');
+        if (i % 3 === 1) el.classList.add('d1');
+        if (i % 3 === 2) el.classList.add('d2');
+      });
+    });
+    document.querySelectorAll(
+      '.features h2, .features .lead, .how h2, .showcase .copy, .showcase .visual, .origin .q, .origin .by, .faq h2, details, .closing .box'
+    ).forEach(el => el.classList.add('reveal'));
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // Sticky mobile CTA: show once the hero scrolls out of view.
+    const mcta = document.querySelector('.mcta');
+    const hero = document.querySelector('.hero');
+    if (mcta && hero) {
+      new IntersectionObserver(([e]) => {
+        mcta.classList.toggle('show', !e.isIntersecting);
+      }, { threshold: 0 }).observe(hero);
+    }
+  })();
+</script>
+</body>
+</html>
