@@ -11,6 +11,15 @@
 <meta property="og:description" content="Real-time bird-strike risk for pilots, on iPhone and iPad. Join the waitlist." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://birdrisk.com" />
+<meta property="og:site_name" content="BirdRisk" />
+<meta property="og:image" content="https://birdrisk.com/assets/og-cover.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="BirdRisk on iPhone: bird-strike risk over Spain in flight, on terrain and satellite maps." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="BirdRisk — Know the sky before you fly" />
+<meta name="twitter:description" content="Real-time bird-strike risk for pilots, on iPhone and iPad. Join the waitlist." />
+<meta name="twitter:image" content="https://birdrisk.com/assets/og-cover.jpg" />
 
 <link rel="canonical" href="https://birdrisk.com/" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -216,6 +225,32 @@
   .bar.b-2 i { width: 60%; background: var(--risk-high); animation-delay: .4s; }
   .bar.b-3 i { width: 38%; background: var(--risk-medium); animation-delay: .8s; }
   .bar.b-4 i { width: 22%; background: var(--risk-low); animation-delay: 1.2s; }
+
+  /* ── Real-media device frames (video + screenshots) ── */
+  .phone { position: relative; background: #0b1220; border-radius: 40px; padding: 9px;
+    box-shadow: var(--shadow-device); border: 3px solid #2b3650; aspect-ratio: 1206 / 2622; }
+  .phone .screen { position: relative; border-radius: 31px; overflow: hidden; background: var(--map-bg); height: 100%; }
+  .phone .screen video, .phone .screen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .phone .notch { position: absolute; top: 13px; left: 50%; transform: translateX(-50%); z-index: 5;
+    width: 88px; height: 23px; background: #05080f; border-radius: 13px; }
+
+  /* Hero stack: video phone in front, risk screenshot peeking behind */
+  .devstack { position: relative; display: grid; place-items: center; min-height: 520px; animation: float 7s ease-in-out infinite; }
+  .devstack .front { position: relative; z-index: 2; width: min(62%, 300px); transform: rotate(-2deg); }
+
+  /* Showcase visuals that hold a real phone */
+  .visual.media { background: transparent; box-shadow: none; padding: 0; min-height: auto; display: grid; place-items: center; }
+  .visual.media .phone { width: min(74%, 262px); }
+
+  /* ── Cockpit gallery ── */
+  .gallery { padding: clamp(36px, 5vw, 72px) 0; background: #fff; }
+  .gallery h2 { text-align: center; font-size: clamp(1.6rem, 3.4vw, 2.4rem); color: var(--brand-primary); letter-spacing: -0.02em; }
+  .gallery .lead { text-align: center; max-width: 52ch; margin: 14px auto 44px; color: var(--ink-soft); }
+  .gallery .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 3vw, 34px); max-width: 760px; margin-inline: auto; }
+  .gallery .item { text-align: center; }
+  .gallery .item .phone { width: 100%; }
+  .gallery .item .cap { margin-top: 14px; font-family: var(--font-data); font-size: 0.78rem; letter-spacing: .04em; color: var(--ink-soft); }
+  @media (max-width: 820px) { .gallery .row { grid-template-columns: 1fr; max-width: 290px; gap: 30px; } }
 
   /* ── Features ── */
   .features { padding: clamp(40px, 6vw, 88px) 0; }
@@ -430,57 +465,15 @@
       </div>
     </div>
 
-    <!-- Animated device cluster -->
-    <div class="devices" aria-hidden="true">
-      <!-- iPad (behind) -->
-      <div class="ipad">
-        <div class="screen">
-          <div class="pad-layout">
-            <div style="position:relative;overflow:hidden;">
-              <div class="map-grid"></div>
-              <div class="radar"><span class="ring r1"></span><span class="ring r2"></span><span class="sweep"></span></div>
-              <span class="zone crit"></span><span class="zone high"></span><span class="zone med"></span>
-              <svg class="route" viewBox="0 0 300 220" preserveAspectRatio="none">
-                <path d="M30 180 C 110 120, 170 150, 260 50" />
-                <circle class="ac" cx="260" cy="50" r="4" />
-              </svg>
-              <span class="bird b1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
-              <span class="bird b2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
-            </div>
-            <div class="panel">
-              <div class="ph">Route risk</div>
-              <div class="bar b-1"><i></i></div>
-              <div class="bar b-2"><i></i></div>
-              <div class="bar b-3"><i></i></div>
-              <div class="bar b-4"><i></i></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- iPhone (front) -->
-      <div class="iphone">
+    <!-- Live in-flight view: real screen recording, autoplay loop -->
+    <div class="devstack">
+      <div class="phone front">
         <span class="notch"></span>
         <div class="screen">
-          <div class="map-grid"></div>
-          <div class="radar"><span class="ring r1"></span><span class="ring r2"></span><span class="sweep"></span></div>
-          <span class="zone crit"></span><span class="zone high"></span><span class="zone med"></span>
-          <svg class="route" viewBox="0 0 270 580" preserveAspectRatio="none">
-            <path d="M40 500 C 120 380, 90 280, 200 120" />
-            <circle class="ac" cx="200" cy="120" r="5" />
-          </svg>
-          <span class="bird b1"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
-          <span class="bird b2"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
-          <span class="bird b3"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 12c4-3 6-3 10 0 4-3 6-3 10 0-4 1-6 1-10-2-4 3-6 3-10 2Z"/></svg></span>
-          <div class="sheet">
-            <div class="lbl">Bird-strike risk · LEMD → LPPT</div>
-            <div class="score"><b>HIGH</b> <span>· peak 18:00–20:00 UTC</span></div>
-            <div class="meter"><i></i></div>
-            <div class="risk-chips" style="margin-top:8px;">
-              <span class="chip low">LOW</span><span class="chip med">MED</span>
-              <span class="chip high">HIGH</span><span class="chip crit">CRIT</span>
-            </div>
-          </div>
+          <video autoplay muted loop playsinline preload="metadata" poster="/assets/flight-poster.webp"
+                 aria-label="BirdRisk in flight over the Pyrenees, showing live aircraft position over the terrain with bird-strike risk and an altitude band selector">
+            <source src="/assets/birdrisk-flight.mp4" type="video/mp4" />
+          </video>
         </div>
       </div>
     </div>
@@ -508,18 +501,18 @@
 <!-- ───────── Features ───────── -->
 <section class="features">
   <div class="wrap">
-    <h2>One score. Every bird. Before takeoff.</h2>
-    <p class="lead">Built for pilots flying Spain and Portugal, BirdRisk does one thing well: it tells you how risky birds make your route right now — clearly enough to glance at on a kneeboard.</p>
+    <h2>One score. Every bird. Before and during the flight.</h2>
+    <p class="lead">Built for pilots flying Spain and Portugal, BirdRisk does one thing well: it tells you how risky birds make your route — on the ground when you plan it, and in the air as you fly it — clearly enough to glance at on a kneeboard.</p>
     <div class="grid3">
       <div class="card">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6 9 3l6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/></svg></div>
-        <h3>Risk along your route</h3>
-        <p>Draw your departure and destination — BirdRisk colours the corridor by live bird-strike likelihood, hour by hour.</p>
+        <h3>Plan it on the ground</h3>
+        <p>Draw a route and BirdRisk colours each segment by bird-strike risk — by hour of day and altitude band — from real migration, wetland and radar data.</p>
       </div>
       <div class="card">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="5"/></svg></div>
-        <h3>Real bird data</h3>
-        <p>Migration corridors, radar activity and seasonal patterns fused into a single score you can trust at a glance.</p>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 19-9-9 19-2-8-8-2Z"/></svg></div>
+        <h3>Fly with it live</h3>
+        <p>In the air, your aircraft tracks over the 3D terrain with the risk right now and just ahead — plus a quiet heads-up the moment you enter a busier area.</p>
       </div>
       <div class="card">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 2"/></svg></div>
@@ -558,15 +551,19 @@
 <section class="showcase">
   <div class="wrap">
     <div class="copy reveal">
-      <span class="tag">Kneeboard-ready</span>
-      <h2>One look. One number. Decide.</h2>
-      <p>No menus, no clutter. BirdRisk gives you a single risk level for your route — big enough to read on a kneeboard, fast enough to check on the taxiway.</p>
+      <span class="tag">In the air, at a glance</span>
+      <h2>Risk now. Risk ahead.</h2>
+      <p>In flight, BirdRisk follows your aircraft over the terrain and reads the bird-strike risk where you are — and where you're heading. A quiet banner flags the moment you cross into a higher-risk area. Kneeboard-clear, no menus.</p>
     </div>
-    <div class="visual reveal d1">
-      <div class="map-grid"></div>
-      <div class="glance" aria-hidden="true">
-        <div class="glance-ring"><div class="v"><b>HIGH</b><small>RISK</small></div></div>
-        <div class="route-lbl">LEMD → LPPT · now</div>
+    <div class="visual media reveal d1">
+      <div class="phone">
+        <span class="notch"></span>
+        <div class="screen">
+          <picture>
+            <source type="image/webp" srcset="/assets/flight-risk-madrid-540.webp 540w, /assets/flight-risk-madrid-1080.webp 1080w" sizes="(max-width: 820px) 262px, 262px" />
+            <img src="/assets/flight-risk-madrid-1080.webp" alt="BirdRisk in flight near Madrid: an orange moderate-risk area with an 'Entering moderate risk area' banner and Now / Ahead set to Moderate" loading="lazy" decoding="async" width="1080" height="2347" />
+          </picture>
+        </div>
       </div>
     </div>
   </div>
@@ -576,27 +573,66 @@
 <section class="showcase rev">
   <div class="wrap">
     <div class="copy">
-      <span class="tag">Timing is everything</span>
-      <h2>Risk changes by the hour.</h2>
-      <p>Birds move at dawn and dusk. BirdRisk shows you how the risk on your route rises and falls through the day — so you can pick the safest window to depart.</p>
+      <span class="tag">Tap to understand</span>
+      <h2>Tap a zone. Know why — and when.</h2>
+      <p>Every risk area is explainable. Tap it to see the level, the coordinates and the dominant factor behind it — then open the hourly trend to find the calmer window. Birds move at dawn and dusk; BirdRisk shows you when.</p>
     </div>
-    <div class="visual">
-      <div class="timeline" aria-hidden="true">
-        <div class="h" style="height:38%;background:var(--risk-low)"></div>
-        <div class="h" style="height:34%;background:var(--risk-low);animation-delay:.1s"></div>
-        <div class="h" style="height:40%;background:var(--risk-low);animation-delay:.2s"></div>
-        <div class="h" style="height:58%;background:var(--risk-medium);animation-delay:.3s"></div>
-        <div class="h" style="height:52%;background:var(--risk-medium);animation-delay:.4s"></div>
-        <div class="h" style="height:44%;background:var(--risk-low);animation-delay:.5s"></div>
-        <div class="h" style="height:48%;background:var(--risk-medium);animation-delay:.6s"></div>
-        <div class="h" style="height:70%;background:var(--risk-high);animation-delay:.7s"></div>
-        <div class="h" style="height:95%;background:var(--risk-critical);animation-delay:.8s"></div>
-        <div class="h" style="height:80%;background:var(--risk-high);animation-delay:.9s"></div>
-        <div class="h" style="height:54%;background:var(--risk-medium);animation-delay:1s"></div>
-        <div class="h" style="height:40%;background:var(--risk-low);animation-delay:1.1s"></div>
-        <div class="lab"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div>
+    <div class="visual media">
+      <div class="phone">
+        <span class="notch"></span>
+        <div class="screen">
+          <picture>
+            <source type="image/webp" srcset="/assets/sat-risk-madrid-540.webp 540w, /assets/sat-risk-madrid-1080.webp 1080w" sizes="(max-width: 820px) 262px, 262px" />
+            <img src="/assets/sat-risk-madrid-1080.webp" alt="BirdRisk on a satellite map: tapping a moderate-risk zone opens a panel with the risk level, coordinates, dominant factor and a 'View hourly trend' link" loading="lazy" decoding="async" width="1080" height="2347" />
+          </picture>
+        </div>
       </div>
-      <div class="tl-cap">Peak risk today: <b>18:00–20:00 UTC</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── Cockpit gallery ───────── -->
+<section class="gallery">
+  <div class="wrap">
+    <h2>See it in the cockpit.</h2>
+    <p class="lead">Hillshade or satellite, day or dusk — BirdRisk stays glanceable over the terrain you actually fly.</p>
+    <div class="row">
+      <div class="item reveal">
+        <div class="phone">
+          <span class="notch"></span>
+          <div class="screen">
+            <picture>
+              <source type="image/webp" srcset="/assets/flight-pirineo-540.webp 540w, /assets/flight-pirineo-1080.webp 1080w" sizes="(max-width: 820px) 290px, 240px" />
+              <img src="/assets/flight-pirineo-540.webp" alt="BirdRisk in flight over the Pyrenees on 3D hillshade terrain, with Now and Ahead both reading Low" loading="lazy" decoding="async" width="540" height="1174" />
+            </picture>
+          </div>
+        </div>
+        <p class="cap">In flight · 3D terrain</p>
+      </div>
+      <div class="item reveal d1">
+        <div class="phone">
+          <span class="notch"></span>
+          <div class="screen">
+            <picture>
+              <source type="image/webp" srcset="/assets/flight-picos-540.webp 540w, /assets/flight-picos-1080.webp 1080w" sizes="(max-width: 820px) 290px, 240px" />
+              <img src="/assets/flight-picos-540.webp" alt="BirdRisk tracking the aircraft over the Picos de Europa with the altitude band selector and live position marker" loading="lazy" decoding="async" width="540" height="1174" />
+            </picture>
+          </div>
+        </div>
+        <p class="cap">Your track, live</p>
+      </div>
+      <div class="item reveal d2">
+        <div class="phone">
+          <span class="notch"></span>
+          <div class="screen">
+            <picture>
+              <source type="image/webp" srcset="/assets/sat-picos-540.webp 540w, /assets/sat-picos-1080.webp 1080w" sizes="(max-width: 820px) 290px, 240px" />
+              <img src="/assets/sat-picos-540.webp" alt="BirdRisk over the Picos de Europa on a satellite basemap" loading="lazy" decoding="async" width="540" height="1174" />
+            </picture>
+          </div>
+        </div>
+        <p class="cap">Satellite basemap</p>
+      </div>
     </div>
   </div>
 </section>
