@@ -25,6 +25,10 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <meta name="theme-color" content="#5F322F" />
 
+<!-- Publytics — cookieless, privacy-first analytics (no consent banner needed) -->
+<script defer data-domain="birdrisk.com/ySifX0" src="https://api.publytics.net/js/script.manual.min.js"></script>
+<script>window.publytics=window.publytics||function(){(window.publytics.q=window.publytics.q||[]).push(arguments)};publytics('pageview');</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=B612+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -809,7 +813,8 @@
   // Lightweight, cookieless analytics: fires to Plausible/GA if present, else no-op.
   function track(event, props) {
     try {
-      if (window.plausible) window.plausible(event, { props });
+      if (window.publytics) window.publytics(event, { props });
+      else if (window.plausible) window.plausible(event, { props });
       else if (window.gtag) window.gtag('event', event, props || {});
     } catch (_) {}
   }
